@@ -1,0 +1,26 @@
+Cahier des charges :
+	
+Mission : Faire un Tetris avec des projectiles essayant de détruire le bloc en 4 morceaux 
+
+en JavaFX
+
+Tetris :
+	Une matrice ayant
+		des blocs
+	un groupe de 4 blocs contrôlable (le joueur) qui descend une ligne par une ligne 
+	quand le joueur touche le sol alors le groupe de blocs n'est plus le joueur et on rajoute un nouveau joueur
+	voir la liste du prochain groupe de bloc joué
+	faire que lorsqu'une ligne de la matrice est remplie, alors détruire, descendre tout les blocs au dessus puis donner score
+	la vitesse du joueur augmente avec le score
+		quand bloc tombe et se met en place regarder quelle ligne est remplie
+	quand une colonne est remplie, alors le jeu prend fin
+	
+	la matrice démarre vide avec le joueur qui apparait en haut et doit toucher le sol, quand le sol est touché alors nouveau joueur puis répétition
+
+Le rajout: un laser qui détruit le joueur et l'explose en 4, 4 blocs qui tombent d'une colonne aléatoire suite à l'explosion
+	le laser vient du bas (à voir si une autre direction plus tars) et remonte en haut de la matrice.
+
+
+Limite de temps: jusqu'à mi-octobre
+
+Nom du jeu Latrix
