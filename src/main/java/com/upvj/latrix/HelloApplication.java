@@ -11,6 +11,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import com.upvj.latrix.gameObjects.*;
+
+
 import java.io.IOException;
 
 public class HelloApplication extends Application {
@@ -21,9 +24,14 @@ public class HelloApplication extends Application {
         Group root = new Group();
         Scene s = new Scene(root, 300, 300, Color.WHITE);
 
-        final Canvas canvas = new GameCanvas(s);
+        final GameCanvas canvas = new GameCanvas(s);
+        Tetris blok = new Tetris();
+        canvas.InsertInRenderList(blok);
+
 
         root.getChildren().add(canvas);
+
+        canvas.StartRender();
 
 
         stage.setTitle("Latrix!");

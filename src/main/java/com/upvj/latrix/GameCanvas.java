@@ -16,11 +16,10 @@ public class GameCanvas extends Canvas {
 
     // Method used in the MainGraphicLoop
     private boolean MainGraphicLoopStatus = false;
-    private void Render()  {
+    public void Render()  {
         while(MainGraphicLoopStatus){
+
             RenderList
-                    .stream()
-                    .sorted(CompareOnZ)
                     .forEach(
                             (Go)->{
                                 if (!Go.draw(GC)) {
@@ -67,6 +66,8 @@ public class GameCanvas extends Canvas {
 
         GC = this.getGraphicsContext2D();
 
+        MainGraphicLoop.setDaemon(true);
+
 
 
     }
@@ -74,7 +75,7 @@ public class GameCanvas extends Canvas {
     public void InsertInRenderList(GraphicObject Go) {
         if (!RenderList.contains(Go)){
             RenderList.add(Go);
-            RenderList.
+            RenderList.sort(CompareOnZ);
         }
     }
 
