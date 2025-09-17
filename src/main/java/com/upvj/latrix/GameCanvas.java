@@ -1,5 +1,6 @@
 package com.upvj.latrix;
 
+import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.*;
 
@@ -15,10 +16,7 @@ public class GameCanvas extends Canvas {
     Comparator<GraphicObject> CompareOnZ = Comparator.comparingInt(GraphicObject::zIndex);
 
     // Method used in the MainGraphicLoop
-    private boolean MainGraphicLoopStatus = false;
     public void Render()  {
-        while(MainGraphicLoopStatus){
-
             RenderList
                     .forEach(
                             (Go)->{
@@ -27,46 +25,35 @@ public class GameCanvas extends Canvas {
                                 };
                             }
                     );
-            try {
-                Thread.sleep(17);
-            } catch ( InterruptedException ignored) {
-
-            }
-            ;
-
-
-        }
-
-
     }
 
 
 
-    Thread MainGraphicLoop = new Thread(this::Render);
+    private final AnimationTimer MainGraphicLoop;
 
     public void StartRender(){
-        if(!MainGraphicLoopStatus){
-            MainGraphicLoop.start();
-            MainGraphicLoopStatus=true;
-        }else{
-            System.err.println("MainGraphicLoop already started.");
-        }
+        MainGraphicLoop.start();
 
     }
 
     public void StopRender(){
-
+        MainGraphicLoop.stop();
     }
 
 
     public GameCanvas(Scene scene){
-        super();
+        super(scene.getWidth(), scene.getHeight());
         this.widthProperty().bind(scene.widthProperty());
         this.heightProperty().bind(scene.heightProperty());
 
         GC = this.getGraphicsContext2D();
 
-        MainGraphicLoop.setDaemon(true);
+        MainGraphicLoop = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                Render();
+            }
+        };
 
 
 
@@ -76,6 +63,8 @@ public class GameCanvas extends Canvas {
         if (!RenderList.contains(Go)){
             RenderList.add(Go);
             RenderList.sort(CompareOnZ);
+
+            System.out.println("Renderlist now has "+RenderList.size()+" elements");
         }
     }
 

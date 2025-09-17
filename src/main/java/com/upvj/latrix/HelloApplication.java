@@ -25,18 +25,28 @@ public class HelloApplication extends Application {
         Scene s = new Scene(root, 300, 300, Color.WHITE);
 
         final GameCanvas canvas = new GameCanvas(s);
-        Tetris blok = new Tetris();
-        canvas.InsertInRenderList(blok);
+
 
 
         root.getChildren().add(canvas);
 
-        canvas.StartRender();
+
 
 
         stage.setTitle("Latrix!");
         stage.setScene(s);
         stage.show();
+
+        Tetris blok = new Tetris();
+        canvas.InsertInRenderList(blok);
+
+        canvas.StartRender();
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public static void main(String[] args) {
