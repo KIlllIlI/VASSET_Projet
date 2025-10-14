@@ -1,5 +1,6 @@
 package com.upvj.latrix;
 
+import com.upvj.latrix.gameObjects.RenderableCanvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.*;
@@ -7,68 +8,11 @@ import javafx.scene.canvas.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class GameCanvas extends Canvas {
+public class GameCanvas extends RenderableCanvas {
 
-    GraphicsContext GC;
 
-    ArrayList<GraphicObject> RenderList = new ArrayList<>();
-
-    Comparator<GraphicObject> CompareOnZ = Comparator.comparingInt(GraphicObject::zIndex);
-
-    // Method used in the MainGraphicLoop
-    public void Render()  {
-            RenderList
-                    .forEach(
-                            (Go)->{
-                                if (!Go.draw(GC)) {
-                                    System.err.println("Object "+Go.getClass().getName()+" has failed to draw");
-                                };
-                            }
-                    );
+    public GameCanvas(Scene s) {
+        super(s);
     }
-
-
-
-    private final AnimationTimer MainGraphicLoop;
-
-    public void StartRender(){
-        MainGraphicLoop.start();
-
-    }
-
-    public void StopRender(){
-        MainGraphicLoop.stop();
-    }
-
-
-    public GameCanvas(Scene scene){
-        super(scene.getWidth(), scene.getHeight());
-        this.widthProperty().bind(scene.widthProperty());
-        this.heightProperty().bind(scene.heightProperty());
-
-        GC = this.getGraphicsContext2D();
-
-        MainGraphicLoop = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                Render();
-            }
-        };
-
-
-
-    }
-
-    public void InsertInRenderList(GraphicObject Go) {
-        if (!RenderList.contains(Go)){
-            RenderList.add(Go);
-            RenderList.sort(CompareOnZ);
-
-            System.out.println("Renderlist now has "+RenderList.size()+" elements");
-        }
-    }
-
-
-
 
 }

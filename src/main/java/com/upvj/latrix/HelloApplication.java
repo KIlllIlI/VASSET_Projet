@@ -22,13 +22,18 @@ public class HelloApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
 
         Group root = new Group();
-        Scene s = new Scene(root, 300, 300, Color.WHITE);
+        Scene s = new Scene(root, 1500, 800, Color.WHITE);
 
         final GameCanvas canvas = new GameCanvas(s);
+        final MenuCanvas menu = new MenuCanvas(s);
 
 
 
         root.getChildren().add(canvas);
+        //root.getChildren().add(menu);
+
+
+
 
 
 
@@ -41,11 +46,9 @@ public class HelloApplication extends Application {
         canvas.InsertInRenderList(blok);
 
         canvas.StartRender();
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
+
+
 
     }
 
