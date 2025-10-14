@@ -1,8 +1,7 @@
-package com.upvj.latrix;
+package com.upvj.latrix.graphicObjects;
 
-import com.upvj.latrix.gameObjects.RenderableCanvas;
+import com.upvj.latrix.RenderableCanvas;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 

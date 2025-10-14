@@ -1,10 +1,12 @@
-package com.upvj.latrix.gameObjects;
+package com.upvj.latrix;
 
 import com.upvj.latrix.GraphicObject;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,6 +17,8 @@ public class RenderableCanvas extends Canvas {
     ArrayList<GraphicObject> RenderList = new ArrayList<>();
 
     Comparator<GraphicObject> CompareOnZ = Comparator.comparingInt(GraphicObject::zIndex);
+
+    Paint BackgroundColor = Color.TRANSPARENT;
 
     // Method used in the MainGraphicLoop
     public void Render()  {
@@ -69,7 +73,11 @@ public class RenderableCanvas extends Canvas {
         }
     }
 
+    public Paint getBackgroundColor() {
+        return BackgroundColor;
+    }
 
-
-
+    public void setBackgroundColor(Paint backgroundColor) {
+        BackgroundColor = backgroundColor;
+    }
 }

@@ -1,13 +1,12 @@
 package com.upvj.latrix;
 
+import com.upvj.latrix.graphicObjects.GameCanvas;
+import com.upvj.latrix.graphicObjects.MenuCanvas;
+import com.upvj.latrix.graphicObjects.RectangleLabel;
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -44,6 +43,10 @@ public class HelloApplication extends Application {
 
         Tetris blok = new Tetris();
         canvas.InsertInRenderList(blok);
+
+        RectangleLabel Test = new RectangleLabel(canvas);
+        Test.setSize(0.5,0.5);
+        canvas.InsertInRenderList(Test);
 
         canvas.StartRender();
 
