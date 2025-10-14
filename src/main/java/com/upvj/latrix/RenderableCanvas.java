@@ -22,6 +22,8 @@ public class RenderableCanvas extends Canvas {
 
     // Method used in the MainGraphicLoop
     public void Render()  {
+        GC.setFill(BackgroundColor);
+        GC.fillRect(0,0,this.getWidth(),this.getHeight());
         RenderList
                 .forEach(
                         (Go)->{

@@ -11,7 +11,7 @@ public class RectangleLabel implements GraphicObject { //Fancy wrapper for Graph
 
     private double AnchorX,AnchorY = 0.0;
 
-    private double ScaleX, ScaleY = 0.0;
+    private double PositionX, PositionY = 0.0;
 
     private int OffsetX,OffsetY = 0;
 
@@ -37,8 +37,8 @@ public class RectangleLabel implements GraphicObject { //Fancy wrapper for Graph
             double AbsoluteWidth = ParentWidth * SizeX + SizeOffsetX;
             double AbsoluteHeight = ParentHeight * SizeY + SizeOffsetY;
 
-            double AbsoluteX = ParentWidth * ScaleX - (SizeX * AnchorX) + OffsetX;
-            double AbsoluteY = ParentHeight * ScaleY - (SizeY * AnchorY) + OffsetY;
+            double AbsoluteX = ParentWidth * PositionX - (AbsoluteWidth * AnchorX) + OffsetX;
+            double AbsoluteY = ParentHeight * PositionY - (AbsoluteHeight * AnchorY) + OffsetY;
 
             gc.fillRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);
             gc.strokeRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);
@@ -80,24 +80,24 @@ public class RectangleLabel implements GraphicObject { //Fancy wrapper for Graph
         AnchorY = pair.getValue();
     }
 
-    // --- Scale
+    // --- Position
 
-    public double getScaleX() {
-        return ScaleX;
+    public double getPositionX() {
+        return PositionX;
     }
 
-    public void setScale(double scaleX,double scaleY) {
-        ScaleX = scaleX;
-        ScaleY = scaleY;
+    public void setPosition(double positionX,double positionY) {
+        PositionX = positionX;
+        PositionY = positionY;
     }
 
-    public void setScale(Pair<Double,Double> pair) {
-        ScaleX = pair.getKey();
-        ScaleY = pair.getValue();
+    public void setPosition(Pair<Double,Double> pair) {
+        PositionX = pair.getKey();
+        PositionY = pair.getValue();
     }
 
-    public Pair<Double,Double> getScale() {
-        return new Pair<>(ScaleX,ScaleY)  ;
+    public Pair<Double,Double> getPosition() {
+        return new Pair<>(PositionX,PositionY)  ;
     }
 
     // --- Offset

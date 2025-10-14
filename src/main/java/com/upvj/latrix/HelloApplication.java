@@ -44,11 +44,29 @@ public class HelloApplication extends Application {
         Tetris blok = new Tetris();
         canvas.InsertInRenderList(blok);
 
-        RectangleLabel Test = new RectangleLabel(canvas);
-        Test.setSize(0.5,0.5);
-        canvas.InsertInRenderList(Test);
+        for (int i=1;i<=3;i++) {
+            RectangleLabel Test = new RectangleLabel(canvas);
+
+            Test.setSize(0,0);
+            Test.setSizeOffset(150,50);
+
+
+            Test.setPosition(0.5,0.5+i*0.08);
+
+            Test.setAnchor(0.5,0.5);
+
+            Test.setOffset(0,0);
+
+            canvas.InsertInRenderList(Test);
+
+
+        }
+
+        canvas.setBackgroundColor(Color.WHITE);
 
         canvas.StartRender();
+
+
 
 
 
