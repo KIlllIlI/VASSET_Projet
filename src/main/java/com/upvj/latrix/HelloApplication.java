@@ -1,7 +1,6 @@
 package com.upvj.latrix;
 
 import com.upvj.latrix.graphicObjects.GameCanvas;
-import com.upvj.latrix.graphicObjects.MenuCanvas;
 import com.upvj.latrix.graphicObjects.RectangleLabel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -24,7 +23,7 @@ public class HelloApplication extends Application {
         Scene s = new Scene(root, 1500, 800, Color.WHITE);
 
         final GameCanvas canvas = new GameCanvas(s);
-        final MenuCanvas menu = new MenuCanvas(s);
+        //final MenuCanvas menu = new MenuCanvas(s);
 
 
 
