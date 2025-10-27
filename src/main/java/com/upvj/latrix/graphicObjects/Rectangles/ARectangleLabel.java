@@ -1,4 +1,4 @@
-package com.upvj.latrix.graphicObjects;
+package com.upvj.latrix.graphicObjects.Rectangles;
 
 import com.upvj.latrix.GraphicObject;
 import com.upvj.latrix.RenderableCanvas;
@@ -7,43 +7,33 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.util.Pair;
 
-public class RectangleLabel implements GraphicObject { //Fancy wrapper for GraphiContext.fillRectangle()
+public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper for GraphiContext.fillRectangle()
 
-    private double AnchorX,AnchorY = 0.0;
+    protected double AnchorX,AnchorY = 0.0;
 
-    private double PositionX, PositionY = 0.0;
+    protected double PositionX, PositionY = 0.0;
 
-    private int OffsetX,OffsetY = 0;
+    protected int OffsetX,OffsetY = 0;
 
-    private double SizeX,SizeY = 0.0;
+    protected double SizeX,SizeY = 0.0;
 
-    private int SizeOffsetX,SizeOffsetY = 0;
+    protected int SizeOffsetX,SizeOffsetY = 0;
 
-    private Paint BackgroundColor = Color.WHITE;
 
-    private Paint BorderColor = Color.BLACK;
 
-    private RenderableCanvas Parent;
+    protected RenderableCanvas Parent;
+
+    public double AbsoluteWidth;
+    public double AbsoluteHeight;
+    public double AbsoluteX;
+    public double AbsoluteY;
+
+
+
 
     @Override
     public boolean draw(GraphicsContext gc) {
         try{
-            gc.setStroke(BorderColor);
-            gc.setFill(BackgroundColor);
-
-            double ParentWidth = Parent.getWidth();
-            double ParentHeight = Parent.getHeight();
-
-            double AbsoluteWidth = ParentWidth * SizeX + SizeOffsetX;
-            double AbsoluteHeight = ParentHeight * SizeY + SizeOffsetY;
-
-            double AbsoluteX = ParentWidth * PositionX - (AbsoluteWidth * AnchorX) + OffsetX;
-            double AbsoluteY = ParentHeight * PositionY - (AbsoluteHeight * AnchorY) + OffsetY;
-
-            gc.fillRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);
-            gc.strokeRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);
-
-
             return true;
         }catch(Exception e){
             System.err.println(e.getMessage());
@@ -57,8 +47,12 @@ public class RectangleLabel implements GraphicObject { //Fancy wrapper for Graph
         return GraphicObject.super.zIndex();
     }
 
-    public RectangleLabel(RenderableCanvas parent) {
+    public ARectangleLabel(RenderableCanvas parent) {
         Parent = parent;
+    }
+
+    public boolean contains(double x, double y) {
+        return x > AbsoluteX && x < AbsoluteX + AbsoluteWidth && y > AbsoluteY && y < AbsoluteY + AbsoluteHeight;
     }
 
 
@@ -148,21 +142,7 @@ public class RectangleLabel implements GraphicObject { //Fancy wrapper for Graph
 
     // --- Colors
 
-    public Paint getBackgroundColor() {
-        return BackgroundColor;
-    }
 
-    public void setBackgroundColor(Paint backgroundColor) {
-        BackgroundColor = backgroundColor;
-    }
-
-    public Paint getBorderColor() {
-        return BorderColor;
-    }
-
-    public void setBorderColor(Paint borderColor) {
-        BorderColor = borderColor;
-    }
 
     // --- Parent Canvas
 

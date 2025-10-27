@@ -1,12 +1,14 @@
 package com.upvj.latrix;
 
+
 import com.upvj.latrix.graphicObjects.GameCanvas;
-import com.upvj.latrix.graphicObjects.RectangleLabel;
+import com.upvj.latrix.graphicObjects.Rectangles.*;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import com.upvj.latrix.gameObjects.*;
@@ -17,7 +19,6 @@ import java.io.IOException;
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
 
         Group root = new Group();
         Scene s = new Scene(root, 1500, 800, Color.WHITE);
@@ -44,19 +45,36 @@ public class HelloApplication extends Application {
         canvas.InsertInRenderList(blok);
 
         for (int i=1;i<=3;i++) {
-            RectangleLabel Test = new RectangleLabel(canvas);
+            TextLabel TL = new TextLabel(canvas,"Small");
+            ButtonLabel<TextLabel> Button = new ButtonLabel<TextLabel>(canvas,TL);
 
-            Test.setSize(0,0);
-            Test.setSizeOffset(150,50);
+            TL.setSize(0,0);
+            TL.setSizeOffset(150,50);
+
+            Paint OffWhite = Color.ANTIQUEWHITE;
+
+            Paint GreyWhite = Color.GREY;
 
 
-            Test.setPosition(0.5,0.5+i*0.08);
+            TL.setPosition(0.5,0.5);
 
-            Test.setAnchor(0.5,0.5);
+            TL.setAnchor(0.5,0.5);
 
-            Test.setOffset(0,0);
+            TL.setOffset(0,i*55);
 
-            canvas.InsertInRenderList(Test);
+            TL.setBackgroundColor(OffWhite);
+
+
+
+            canvas.InsertInRenderList(Button);
+
+            Button.setOnHoverEnter(() -> {
+                TL.setBackgroundColor(GreyWhite);
+            });
+
+            Button.setOnHoverExit(() -> {
+                TL.setBackgroundColor(OffWhite);
+            });
 
 
         }
@@ -64,6 +82,8 @@ public class HelloApplication extends Application {
         canvas.setBackgroundColor(Color.WHITE);
 
         canvas.StartRender();
+
+
 
 
 
