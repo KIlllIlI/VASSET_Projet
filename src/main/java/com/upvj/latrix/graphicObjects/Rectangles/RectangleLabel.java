@@ -1,7 +1,7 @@
 package com.upvj.latrix.graphicObjects.Rectangles;
 
 import com.upvj.latrix.GraphicObject;
-import com.upvj.latrix.RenderableCanvas;
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -12,24 +12,16 @@ public class RectangleLabel extends ARectangleLabel {
 
     private Paint BorderColor = Color.BLACK;
 
-    public RectangleLabel(RenderableCanvas parent) {
-        super(parent);
+    public RectangleLabel(Scene scene) {
+        super(scene);
     }
 
     @Override
     public boolean draw(GraphicsContext gc) {
         try{
+            super.draw(gc);
             gc.setStroke(BorderColor);
             gc.setFill(BackgroundColor);
-
-            double ParentWidth = super.Parent.getWidth();
-            double ParentHeight = Parent.getHeight();
-
-            AbsoluteWidth = ParentWidth * SizeX + SizeOffsetX;
-            AbsoluteHeight = ParentHeight * SizeY + SizeOffsetY;
-
-            AbsoluteX = ParentWidth * PositionX - (AbsoluteWidth * AnchorX) + OffsetX;
-            AbsoluteY = ParentHeight * PositionY - (AbsoluteHeight * AnchorY) + OffsetY;
 
             gc.fillRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);
             gc.strokeRect(AbsoluteX,AbsoluteY,AbsoluteWidth,AbsoluteHeight);

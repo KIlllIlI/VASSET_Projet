@@ -2,6 +2,7 @@ package com.upvj.latrix.graphicObjects.Rectangles;
 
 import com.upvj.latrix.GraphicObject;
 import com.upvj.latrix.RenderableCanvas;
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -21,7 +22,7 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
 
 
 
-    protected RenderableCanvas Parent;
+    protected Scene scene;
 
     public double AbsoluteWidth;
     public double AbsoluteHeight;
@@ -33,13 +34,15 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
 
     @Override
     public boolean draw(GraphicsContext gc) {
-        try{
-            return true;
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            return false;
-        }
+        double ParentWidth = scene.getWidth();
+        double ParentHeight = scene.getHeight();
 
+        AbsoluteWidth = ParentWidth * SizeX + SizeOffsetX;
+        AbsoluteHeight = ParentHeight * SizeY + SizeOffsetY;
+
+        AbsoluteX = ParentWidth * PositionX - (AbsoluteWidth * AnchorX) + OffsetX;
+        AbsoluteY = ParentHeight * PositionY - (AbsoluteHeight * AnchorY) + OffsetY;
+        return true;
     }
 
     @Override
@@ -47,8 +50,8 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
         return GraphicObject.super.zIndex();
     }
 
-    public ARectangleLabel(RenderableCanvas parent) {
-        Parent = parent;
+    public ARectangleLabel(Scene scene) {
+        this.scene = scene;
     }
 
     public boolean contains(double x, double y) {
@@ -146,12 +149,12 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
 
     // --- Parent Canvas
 
-    public RenderableCanvas getParent() {
-        return Parent;
+    public Scene getScene() {
+        return scene;
     }
 
-    public void setParent(RenderableCanvas parent) {
-        Parent = parent;
+    public void setParent(Scene scene) {
+        this.scene = scene;
     }
 
 

@@ -1,6 +1,7 @@
 package com.upvj.latrix.graphicObjects.Rectangles;
 
 import com.upvj.latrix.RenderableCanvas;
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -17,14 +18,14 @@ public class TextLabel extends RectangleLabel {
 
     private Paint TextColor;
 
-    public TextLabel(RenderableCanvas parent, String text) {
-        super(parent);
+    public TextLabel(Scene scene, String text) {
+        super(scene);
         this.text = text;
         TextColor = Color.BLACK;
     }
 
-    public TextLabel(RenderableCanvas parent) {
-        super(parent);
+    public TextLabel(Scene scene) {
+        super(scene);
         this.text = "Label";
         TextColor = Color.BLACK;
     }

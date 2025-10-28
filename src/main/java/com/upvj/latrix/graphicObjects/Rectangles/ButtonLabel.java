@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 
-public class ButtonLabel<R extends ARectangleLabel> extends ARectangleLabel {
+public class ButtonLabel<R extends ARectangleLabel> extends ARectangleLabel  {
 
     private R wrappedRectangle;
 
@@ -20,10 +20,10 @@ public class ButtonLabel<R extends ARectangleLabel> extends ARectangleLabel {
 
 
 
-    public ButtonLabel(RenderableCanvas parent, R WrappedRectangle) {
-        super(parent);
+    public ButtonLabel(Scene scene, R WrappedRectangle) {
+        super(scene);
         this.wrappedRectangle = WrappedRectangle;
-        Scene scene = parent.getScene();
+        System.out.println(scene.toString());
 
         scene.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
         scene.addEventHandler(MouseEvent.MOUSE_EXITED, e -> handleMouseExited());
