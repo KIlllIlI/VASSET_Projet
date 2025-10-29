@@ -69,29 +69,14 @@ public class HelloApplication extends Application
         canvas.InsertInRenderList(block);
 
         //Récuperation du bloc par son getter
-        Integer[][] currentBlock = block.getRandomBlockType();
+        //Integer[][] currentBlock = block.getRandomBlockType();
 
+        //Timer pour la descente progressive des blocs
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(fallSpeed), event -> {
             //Faire descendre le bloc avec un vecteur
-            block.moveDownBlock(currentBlock, block.getShapeMatrisMap());
+            block.moveDownBlock();
         }));
-//        do{
-//            try {
-//                //Récuperation de la map et du bloc par les getter
-//                Integer[][] currentBlock = block.getRandomBlockType();
-//                Integer[][] currentMap = block.getShapeMatrisMap();
-//
-//                //Faire descendre le bloc avec un vecteur
-//                block.moveDownBlock(currentBlock, currentMap);
-//
-//
-//                //On attend à la fin de la boucle
-//                Thread.sleep(fallSpeed);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//        } while (isInExecution == false);
-        //Créer une boucle while do avec le mouvement vers le bas
+
 
         //répéter indifiniment
         timeline.setCycleCount(Timeline.INDEFINITE);
