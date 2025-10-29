@@ -126,75 +126,36 @@ public class Tetris implements GraphicObject {
         spawnNewBlock();
     }
 
-    @Override
-    public boolean draw(GraphicsContext gc)
+    private static Integer[][] copyMatrix(Integer[][] src)
     {
-        final int blockSize = 40;
+        Integer[][] copy = new Integer[src.length][src[0].length];
 
-        if (Sprite == null)
+        for (int i = 0; i < src.length; i++)
         {
-            return false;
+            System.arraycopy(src[i], 0, copy[i], 0, src[i].length);
         }
-
-        if (ShapeMatrisMap != null)
-        {
-            for (int i = 0; i < ShapeMatrisMap.length; i++)
-            {
-                for (int j = 0; j < ShapeMatrisMap[i].length; j++)
-                {
-                    if (ShapeMatrisMap[i][j] == 1)
-                    {
-                        gc.drawImage(Sprite, j * blockSize, i * blockSize, blockSize, blockSize);
-                    } else if (ShapeMatrisMap[i][j] == 2) {
-                        gc.drawImage(Sprite2, j * blockSize, i * blockSize, blockSize, blockSize);
-                    }
-                }
-            }
-        }
-
-
-        if (randomBlockType != null)
-        {
-            int y = blockY * blockSize;
-            for (Integer[] lineBloc : this.randomBlockType)
-            {
-                int x = blockX * blockSize;
-                for (Integer bloc : lineBloc)
-                {
-                    if (bloc == 1)
-                    {
-                        gc.drawImage(Sprite, x, y, blockSize, blockSize);
-                    } else if (bloc == 2 && Sprite2 != null) {
-                        gc.drawImage(Sprite2, x, y, blockSize, blockSize);
-                    }
-                    x += blockSize;
-                }
-                y += blockSize;
-            }
-        }
-        return true;
+        return copy;
     }
 
-    //Méthode de déplacement d'un bloc vers le bas
-    public void moveDownBlock(Integer[][] block, Integer[][] map)
+    //Méthode d'apparition d'un bloc aléatoire
+    private void spawnNewBlock()
     {
-        int newY = blockY + 1;
+//        Random random = new Random();
+        //Sélection aléatoire d'un type de bloc
+        Integer[][] original = ALL_BLOCKS[new Random().nextInt(ALL_BLOCKS.length)];
+        randomBlockType = copyMatrix(original);
 
-        if (canMoveDown(block, map, newY))
-        {
-            blockY = newY;
-        } else {
-            //le block se fixe sur la carte s'il ne peut plus descendre
-            placeBlock(block, map);
+        //Emplacement d'origine du bloc à son apparition
+        blockX = 3;
+        blockY = 0;
 
-            //fait appraître un nouveau bloc
-            spawnNewBlock();
-        }
+        System.out.println("spawned new block at X=" + blockX + " Y=" + blockY + " shape=" + java.util.Arrays.deepToString(randomBlockType));
     }
 
     //Méthode de vérification de si le bloc peut descendre
-    private boolean canMoveDown(Integer[][] block, Integer[][] map, int newY)
+    private boolean canMoveDown(Integer[][] block, int newY)
     {
+        Integer[][] map = this.ShapeMatrisMap;
         for(int i = 0; i < block.length; i++)
         {
             for(int j = 0; j < block[i].length; j++)
@@ -203,18 +164,18 @@ public class Tetris implements GraphicObject {
                     int mapY = newY + i;
                     int mapX = blockX + j;
 
+                    if (mapX < 0 || mapX >= map[0].length)
+                    {
+                        return false;
+                    }
+
                     //Si dépasse la dernière ligne
                     if(mapY >= map.length)
                     {
                         return false;
                     }
 
-                    if (mapX < 0 || mapX >= map[0].length)
-                    {
-                        return false;
-                    }
-
-                    //Si touche un bloc déjà posé
+                    //Si touche un bloc est déjà posé
                     if(map[mapY][mapX] == 1)
                     {
                         return false;
@@ -226,8 +187,9 @@ public class Tetris implements GraphicObject {
     };
 
     //Méthode d'immobilisation du bloc sur la map
-    private void placeBlock(Integer[][] block, Integer[][] map)
+    private void placeBlock(Integer[][] block)
     {
+        Integer[][] map = this.ShapeMatrisMap;
         for (int i = 0; i < block.length; i++)
         {
             for (int j = 0; j < block[i].length; j++)
@@ -236,19 +198,94 @@ public class Tetris implements GraphicObject {
                 {
                     int mapX = blockX + j;
                     int mapY = blockY + i;
-                    map[mapY][mapX] = 1;
+
+                    if (mapY >= 0 && mapY < map.length && mapX >= 0 && mapX < map[0].length)
+                    {
+                        map[mapY][mapX] = 1;
+                    } else {
+                        //affichage debug en cas d'erreur
+                        System.err.println("placeBlock hors bornes: mapY=" + mapY + " mapX=" + mapX);
+                    }
                 }
             }
         }
+        //bloc posé et libéré
+        randomBlockType = null;
     }
 
-    //Méthode d'apparition d'un bloc aléatoire
-    private void spawnNewBlock()
+    //Méthode de déplacement d'un bloc vers le bas
+    public void moveDownBlock()
     {
-        Random random = new Random();
-        randomBlockType = ALL_BLOCKS[random.nextInt(ALL_BLOCKS.length)];
-        blockX = 3;
-        blockY = 0;
+        if (randomBlockType == null)
+        {
+            //apparition d'un nouveau bloc si pas de bloc actif
+            spawnNewBlock();
+            return;
+        }
+
+        //déplacement du bloc d'une case
+        int newY = blockY + 1;
+
+        if (canMoveDown(randomBlockType, newY))
+        {
+            blockY = newY;
+        } else {
+            //le bloc se fixe sur la carte s'il ne peut plus descendre
+            placeBlock(randomBlockType);
+
+            //fait appraître un nouveau bloc
+            spawnNewBlock();
+        }
+    }
+
+    //Dessine la map et les blocs
+    @Override
+    public boolean draw(GraphicsContext gc)
+    {
+        final int blockSize = 40;
+
+        if (Sprite == null)
+        {
+            return false;
+        }
+
+        //Dessine la map fixe
+        for (int i = 0; i < ShapeMatrisMap.length; i++)
+        {
+            for (int j = 0; j < ShapeMatrisMap[i].length; j++)
+            {
+                if (ShapeMatrisMap[i][j] == 1)
+                {
+                    gc.drawImage(Sprite, j * blockSize, i * blockSize, blockSize, blockSize);
+                } else if (ShapeMatrisMap[i][j] == 2 && Sprite2 != null) {
+                    gc.drawImage(Sprite2, j * blockSize, i * blockSize, blockSize, blockSize);
+                }
+            }
+        }
+
+        //Dessine le bloc actif s'il existe
+        if (randomBlockType != null)
+        {
+            //int y = blockY * blockSize;
+            for (int i = 0; i < randomBlockType.length; i++)
+            {
+                //int x = blockX * blockSize;
+                for (int j = 0; j < randomBlockType[i].length; j++)
+                {
+                    if (randomBlockType[i][j] == 1)
+                    {
+                        int x = (blockX + j) * blockSize;
+                        int y = (blockY + i) * blockSize;
+                        gc.drawImage(Sprite, x, y, blockSize, blockSize);
+                    } else if (randomBlockType[i][j] == 2 && Sprite2 != null) {
+                        int x = (blockX + j) * blockSize;
+                        int y = (blockY + i) * blockSize;
+                        gc.drawImage(Sprite2, x, y, blockSize, blockSize);
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     //Getter pour la map
