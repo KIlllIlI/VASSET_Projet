@@ -19,7 +19,7 @@ public class GameCanvas extends RenderableCanvas {
     }
 
     public void Start( ) {
-        this.tetris = new Tetris(this.getScene());
+        this.tetris = new Tetris(this);
 
         this.InsertInRenderList(tetris);
 

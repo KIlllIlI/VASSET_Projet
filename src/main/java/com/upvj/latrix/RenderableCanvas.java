@@ -82,8 +82,6 @@ public class RenderableCanvas extends Canvas {
         if (!RenderList.contains(Go)){
             RenderList.add(Go);
             RenderList.sort(CompareOnZ);
-
-            System.out.println("Renderlist now has "+RenderList.size()+" elements");
         }
     }
 

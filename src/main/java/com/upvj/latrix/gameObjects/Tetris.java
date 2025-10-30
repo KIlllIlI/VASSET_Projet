@@ -29,6 +29,9 @@ public class Tetris implements GraphicObject {
             ShapeMatrix.rL.getMatrix(),
     };
 
+    private static final int removedFromBottom = 64;
+    private static final int movedFromTop = 16;
+
     private static final Color[] BLOCK_COLORS = {
             Color.BLUE, Color.hsb((double) 300 /360,1,1), Color.LIME, Color.CYAN, Color.YELLOW, Color.hsb((double) 278 /360,1,1), Color.ORANGE
     };
@@ -58,6 +61,7 @@ public class Tetris implements GraphicObject {
 
     // ======== INSTANCE FIELDS ========
     private final Scene scene;
+    private final GameCanvas canvas;
     private final Integer[][] map;
     private Integer[][] activeBlock;
     private Image activeBlockImage;
@@ -78,8 +82,9 @@ public class Tetris implements GraphicObject {
     private final Random random = new Random();
 
     // ======== CONSTRUCTOR ========
-    public Tetris(Scene scene) {
-        this.scene = scene;
+    public Tetris(GameCanvas canvas) {
+        this.canvas = canvas;
+        this.scene = canvas.getScene();
         this.map = ShapeMatrix.MAP.getMatrix();
         this.colorMap = new Image[rows][cols];
 
@@ -318,19 +323,22 @@ public class Tetris implements GraphicObject {
     public boolean draw(GraphicsContext gc) {
         gc.setImageSmoothing(false);
 
-        double blockSize = scene.getHeight() / rows;
+        double blockSize = (scene.getHeight() - removedFromBottom) / rows;
         double width = blockSize * cols;
         double offsetX = (scene.getWidth() - width) / 2;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
+
+                double Y = (i * blockSize)+movedFromTop;
+
                 if (map[i][j] == 1) {
-                    gc.drawImage(colorMap[i][j], offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
+                    gc.drawImage(colorMap[i][j], offsetX + j * blockSize, Y , blockSize, blockSize);
                 } else {
                     gc.setFill(Color.hsb(0,0,0,0.5));
-                    gc.fillRect(offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
+                    gc.fillRect(offsetX + j * blockSize, Y, blockSize, blockSize);
                     gc.setStroke(Color.gray(0.4));
-                    gc.strokeRect(offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
+                    gc.strokeRect(offsetX + j * blockSize, Y, blockSize, blockSize);
                 }
             }
         }
@@ -341,7 +349,7 @@ public class Tetris implements GraphicObject {
                 for (int j = 0; j < activeBlock[i].length; j++) {
                     if (activeBlock[i][j] == 1) {
                         double x = offsetX + (blockX + j) * blockSize;
-                        double y = (blockY + i) * blockSize;
+                        double y = (blockY + i) * blockSize + movedFromTop;
                         gc.drawImage(activeBlockImage, x, y, blockSize, blockSize);
                     }
                 }
