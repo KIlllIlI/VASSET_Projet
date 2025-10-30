@@ -6,12 +6,10 @@ import com.upvj.latrix.graphicObjects.Rectangles.*;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.*;
 import javafx.stage.Stage;
-
 import com.upvj.latrix.gameObjects.*;
+
 
 
 import java.io.IOException;
@@ -29,47 +27,49 @@ public class HelloApplication extends Application {
         final MenuCanvas menu = new MenuCanvas(s);
 
 
-
         root.getChildren().add(gameCanvas);
         root.getChildren().add(menu);
 
 
-
-
-
-
-
-        stage.setTitle("Latrix!");
+        stage.setTitle("Latrix");
         stage.setScene(s);
         stage.show();
 
-        Tetris blok = new Tetris();
-        gameCanvas.InsertInRenderList(blok);
-
-        for (int i=1;i<=3;i++) {
-            RectangleLabel Test = new RectangleLabel(gameCanvas);
+        for (int i = 1; i <= 3; i++) {
+            RectangleLabel Test = new RectangleLabel(s);
 
 
+            Paint gameBackground = new RadialGradient(
+                    0,                // focusAngle
+                    0,                // focusDistance
+                    0.5,              // centerX (0–1, relative to shape)
+                    0.5,              // centerY
+                    0.5,              // radius (0–1, relative)
+                    true,             // proportional (true = use relative coordinates)
+                    CycleMethod.NO_CYCLE, // don't repeat
+                    new Stop(0, Color.LIMEGREEN),   // center color
+                    new Stop(1, Color.rgb(0,50,0))    // edge color
+            );
 
-        gameCanvas.setBackgroundColor(Color.WHITE);
+            gameCanvas.setBackgroundColor(gameBackground);
 
-        menu.StartRender();
-        menu.toFront();
+            menu.StartRender();
+            menu.toFront();
 
-        menu.getStartButton().setOnClick(event -> {
-            menu.StopRender();
-            System.out.println("Still working ?");
+            menu.getStartButton().setOnClick(event -> {
+                menu.StopRender();
+                System.out.println("Still working ?");
 
-            gameCanvas.toFront();
-            gameCanvas.StartRender();
-
-        });
-
+                gameCanvas.toFront();
+                gameCanvas.Start();
+                gameCanvas.StartRender();
 
 
+            });
 
-        //Execution du jeu
-        ExecuteGame(canvas);
+        }
+
+
     }
 
     public static void main(String[] args)
@@ -77,27 +77,6 @@ public class HelloApplication extends Application {
         launch();
     }
 
-    public static void ExecuteGame(GameCanvas canvas)
-    {
-        boolean isInExecution = true;
-        int fallSpeed = 1000;
-
-        Tetris block = new Tetris();
-
-        canvas.InsertInRenderList(block);
-
-        //Récuperation du bloc par son getter
-        //Integer[][] currentBlock = block.getRandomBlockType();
-
-        //Timer pour la descente progressive des blocs
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(fallSpeed), event -> {
-            //Faire descendre le bloc avec un vecteur
-            block.moveDownBlock();
-        }));
 
 
-        //répéter indifiniment
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
-    }
 }

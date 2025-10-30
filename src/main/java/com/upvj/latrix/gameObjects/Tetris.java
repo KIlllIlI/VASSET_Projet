@@ -1,314 +1,352 @@
 package com.upvj.latrix.gameObjects;
 
 import com.upvj.latrix.GraphicObject;
+import com.upvj.latrix.graphicObjects.GameCanvas;
+import com.upvj.latrix.graphicObjects.Rectangles.ImageLabel;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.ColorInput;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
-import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
-
 public class Tetris implements GraphicObject {
-    private Image Sprite = null;
-    private Image Sprite2 = null;
 
-    //bloc en forme de L
-    private static Integer[][] ShapeMatrisBlock_L = {
-            {1, 0, 0, 0},
-            {1, 0, 0, 0},
-            {1, 0, 0, 0},
-            {1, 1, 0, 0}
-    };
-
-    //bloc en forme de I
-    private static Integer[][] ShapeMatrisBlock_I = {
-            {1, 0, 0, 0},
-            {1, 0, 0, 0},
-            {1, 0, 0, 0},
-            {1, 0, 0, 0}
-    };
-
-    //bloc en forme de O
-    private static Integer[][] ShapeMatrisBlock_O = {
-            {0, 0, 0, 0},
-            {0, 0, 0, 0},
-            {1, 1, 0, 0},
-            {1, 1, 0, 0}
-    };
-
-    //bloc en forme de S
-    private static Integer[][] ShapeMatrisBlock_S = {
-            {1, 0, 0, 0},
-            {1, 1, 0, 0},
-            {0, 1, 0, 0},
-            {0, 0, 0, 0}
-    };
-
-    //bloc en forme de T
-    private static Integer[][] ShapeMatrisBlock_T = {
-            {1, 1, 1, 0},
-            {0, 1, 0, 0},
-            {0, 0, 0, 0},
-            {0, 0, 0, 0}
-    };
-
+    // ======== STATIC HELPERS ========
     private static final Integer[][][] ALL_BLOCKS = {
-            ShapeMatrisBlock_L,
-            ShapeMatrisBlock_I,
-            ShapeMatrisBlock_O,
-            ShapeMatrisBlock_S,
-            ShapeMatrisBlock_T
+            ShapeMatrix.L.getMatrix(),
+            ShapeMatrix.I.getMatrix(),
+            ShapeMatrix.O.getMatrix(),
+            ShapeMatrix.S.getMatrix(),
+            ShapeMatrix.T.getMatrix(),
+            ShapeMatrix.rS.getMatrix(),
+            ShapeMatrix.rL.getMatrix(),
     };
 
-    //Apparition d'un bloc au hasard
-//    Random random = new Random();
-    Integer[][] randomBlockType;
-
-    final int raw = 20;
-    final int col = 10;
-//    Integer[][] map = new Integer[raw][col];
-
-    //définition de la map
-    private final Integer[][] ShapeMatrisMap = {
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    private static final Color[] BLOCK_COLORS = {
+            Color.BLUE, Color.hsb((double) 300 /360,1,1), Color.LIME, Color.CYAN, Color.YELLOW, Color.hsb((double) 278 /360,1,1), Color.ORANGE
     };
 
-    private int blockX = 3;
-    private int blockY = 0;
+    private static final Map<Integer[][], Image> BLOCK_IMAGES = new HashMap<>();
 
-    int[] vector = {0, 1};
-//    bX += vector[0];
-//    bY += vector[1];
+    private final Image[][] colorMap; // same size as map
 
-    //Constructeur constituant les bases d'un bloc
-    public Tetris()
-    {
-        String imagePath = "/com/upvj/latrix/block.png";
-        URL imageUrl = Tetris.class.getResource("/com/upvj/latrix/block.png");
-        URL image2 = Tetris.class.getResource("/com/upvj/latrix/Logo.png");
-        if (image2 != null)
-        {
-            Sprite2 = new Image(image2.toExternalForm());
-        } else {
-            System.err.println("Error: block.png not found in resources/com/upvj/latrix/");
+    // Load colored images for each block at startup
+    public static void initBlockImages(Image baseSprite) {
+        for (int i = 0; i < ALL_BLOCKS.length; i++) {
+            BLOCK_IMAGES.put(ALL_BLOCKS[i], ImageLabel.screen(baseSprite, BLOCK_COLORS[i]));
         }
-        if (imageUrl != null)
-        {
-            Sprite = new Image(imageUrl.toExternalForm());
-        } else {
-            System.err.println("Error: block.png not found in resources/com/upvj/latrix/");
-        }
-
-        //Apparition d'un bloc
-        spawnNewBlock();
     }
 
-    private static Integer[][] copyMatrix(Integer[][] src)
-    {
+    private static Integer[][] copyMatrix(Integer[][] src) {
         Integer[][] copy = new Integer[src.length][src[0].length];
-
-        for (int i = 0; i < src.length; i++)
-        {
+        for (int i = 0; i < src.length; i++) {
             System.arraycopy(src[i], 0, copy[i], 0, src[i].length);
         }
         return copy;
     }
 
-    //Méthode d'apparition d'un bloc aléatoire
-    private void spawnNewBlock()
-    {
-//        Random random = new Random();
-        //Sélection aléatoire d'un type de bloc
-        Integer[][] original = ALL_BLOCKS[new Random().nextInt(ALL_BLOCKS.length)];
-        randomBlockType = copyMatrix(original);
-
-        //Emplacement d'origine du bloc à son apparition
-        blockX = 3;
-        blockY = 0;
-
-        System.out.println("spawned new block at X=" + blockX + " Y=" + blockY + " shape=" + java.util.Arrays.deepToString(randomBlockType));
+    private static Integer[][] randomShape() {
+        return copyMatrix(ALL_BLOCKS[new Random().nextInt(ALL_BLOCKS.length)]);
     }
 
-    //Méthode de vérification de si le bloc peut descendre
-    private boolean canMoveDown(Integer[][] block, int newY)
-    {
-        Integer[][] map = this.ShapeMatrisMap;
-        for(int i = 0; i < block.length; i++)
-        {
-            for(int j = 0; j < block[i].length; j++)
-            {
-                if(block[i][j] == 1){
-                    int mapY = newY + i;
-                    int mapX = blockX + j;
+    // ======== INSTANCE FIELDS ========
+    private final Scene scene;
+    private final Integer[][] map;
+    private Integer[][] activeBlock;
+    private Image activeBlockImage;
 
-                    if (mapX < 0 || mapX >= map[0].length)
-                    {
-                        return false;
-                    }
+    private final int rows = 20;
+    private final int cols = 10;
 
-                    //Si dépasse la dernière ligne
-                    if(mapY >= map.length)
-                    {
-                        return false;
-                    }
+    private int blockX;
+    private int blockY;
 
-                    //Si touche un bloc est déjà posé
-                    if(map[mapY][mapX] == 1)
-                    {
-                        return false;
-                    }
+    private final int fallSpeed = 600; // ms per step
+    private Timeline timeline;
+    private double timeAccumulator = 0; // counter for DOWN key reset
+
+    private boolean running = false;
+
+    private final java.util.List<Integer[][]> blockBag = new java.util.ArrayList<>();
+    private final Random random = new Random();
+
+    // ======== CONSTRUCTOR ========
+    public Tetris(Scene scene) {
+        this.scene = scene;
+        this.map = ShapeMatrix.MAP.getMatrix();
+        this.colorMap = new Image[rows][cols];
+
+        initBlockImages(ImageLabel.getImageFromResource("block.png"));
+        spawnNewBlock();
+        setupInput();
+        startGameLoop();
+    }
+
+    // ======== GAME LOOP ========
+    private void startGameLoop() {
+        timeline = new Timeline(new KeyFrame(Duration.millis(16), e -> update(16)));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+        running = true;
+    }
+
+    private void update(double deltaMillis) {
+        timeAccumulator += deltaMillis;
+
+        // Forced fall based on fallSpeed
+        if (timeAccumulator >= fallSpeed) {
+            moveDown();
+            timeAccumulator = 0;
+        }
+    }
+
+    public void stop() {
+        if (timeline != null) timeline.stop();
+        running = false;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    // ======== INPUT HANDLING ========
+    private void setupInput() {
+        scene.setOnKeyPressed(e -> {
+            if (activeBlock == null || !running) return;
+
+            KeyCode key = e.getCode();
+            switch (key) {
+                case LEFT -> moveHorizontal(-1);
+                case RIGHT -> moveHorizontal(1);
+                case DOWN -> {
+                    moveDown();
+                    // Reset the counter to delay the next forced down
+                    timeAccumulator = 0;
+                }
+                case UP -> rotateBlock(); // Rotate the block
+                case SPACE -> {
+                    hardDrop();
+                    timeAccumulator = 0;
+                }
+            }
+        });
+    }
+
+    private void refillBag() {
+        blockBag.clear();
+        // Add all blocks to the bag
+        for (Integer[][] block : ALL_BLOCKS) {
+            blockBag.add(block);
+        }
+        // Shuffle the bag
+        java.util.Collections.shuffle(blockBag, random);
+    }
+
+    // ======== BLOCK MANAGEMENT ========
+    private void spawnNewBlock() {
+        if (blockBag.isEmpty()) refillBag(); // refill bag if empty
+
+        // Pop the next block from the bag
+        Integer[][] original = blockBag.removeFirst();
+
+        // Copy for gameplay
+        activeBlock = copyMatrix(original);
+
+        // Assign its image
+        activeBlockImage = BLOCK_IMAGES.get(original);
+
+        // Center horizontally
+        blockX = cols / 2 - activeBlock[0].length / 2;
+        blockY = 0;
+
+        // Immediate collision check (game over)
+        if (!canPlace(activeBlock, blockX, blockY)) stop();
+    }
+
+    private boolean canPlace(Integer[][] block, int newX, int newY) {
+        for (int i = 0; i < block.length; i++) {
+            for (int j = 0; j < block[i].length; j++) {
+                if (block[i][j] == 1) {
+                    int x = newX + j;
+                    int y = newY + i;
+
+                    if (x < 0 || x >= cols || y >= rows) return false;
+                    if (y >= 0 && map[y][x] == 1) return false;
                 }
             }
         }
         return true;
-    };
+    }
 
-    //Méthode d'immobilisation du bloc sur la map
-    private void placeBlock(Integer[][] block)
-    {
-        Integer[][] map = this.ShapeMatrisMap;
-        for (int i = 0; i < block.length; i++)
-        {
-            for (int j = 0; j < block[i].length; j++)
-            {
-                if (block[i][j] == 1)
-                {
-                    int mapX = blockX + j;
-                    int mapY = blockY + i;
-
-                    if (mapY >= 0 && mapY < map.length && mapX >= 0 && mapX < map[0].length)
-                    {
-                        map[mapY][mapX] = 1;
-                    } else {
-                        //affichage debug en cas d'erreur
-                        System.err.println("placeBlock hors bornes: mapY=" + mapY + " mapX=" + mapX);
+    private void placeBlock() {
+        for (int i = 0; i < activeBlock.length; i++) {
+            for (int j = 0; j < activeBlock[i].length; j++) {
+                if (activeBlock[i][j] == 1) {
+                    int x = blockX + j;
+                    int y = blockY + i;
+                    if (y >= 0 && y < rows && x >= 0 && x < cols) {
+                        map[y][x] = 1;                 // mark as static block
+                        colorMap[y][x] = activeBlockImage; // store the image for this block
                     }
                 }
             }
         }
-        //bloc posé et libéré
-        randomBlockType = null;
+        activeBlock = null;
+        activeBlockImage = null;
+
+        checkFullLinesAndColumns();
     }
 
-    //Méthode de déplacement d'un bloc vers le bas
-    public void moveDownBlock()
-    {
-        if (randomBlockType == null)
-        {
-            //apparition d'un nouveau bloc si pas de bloc actif
+    // ======== ROTATION ========
+    private void rotateBlock() {
+        // Rotate clockwise
+        Integer[][] rotated = new Integer[activeBlock[0].length][activeBlock.length];
+        for (int i = 0; i < activeBlock.length; i++) {
+            for (int j = 0; j < activeBlock[i].length; j++) {
+                rotated[j][activeBlock.length - 1 - i] = activeBlock[i][j];
+            }
+        }
+        if (canPlace(rotated, blockX, blockY)) {
+            activeBlock = rotated;
+        }
+    }
+
+    // ======== MOVEMENT ========
+    private void moveDown() {
+        if (activeBlock == null) {
             spawnNewBlock();
             return;
         }
 
-        //déplacement du bloc d'une case
-        int newY = blockY + 1;
-
-        if (canMoveDown(randomBlockType, newY))
-        {
-            blockY = newY;
+        if (canPlace(activeBlock, blockX, blockY + 1)) {
+            blockY++;
         } else {
-            //le bloc se fixe sur la carte s'il ne peut plus descendre
-            placeBlock(randomBlockType);
-
-            //fait appraître un nouveau bloc
+            placeBlock(); // Block fixed
             spawnNewBlock();
         }
     }
 
-    //Dessine la map et les blocs
-    @Override
-    public boolean draw(GraphicsContext gc)
-    {
-        final int blockSize = 40;
+    private void moveHorizontal(int dx) {
+        if (canPlace(activeBlock, blockX + dx, blockY)) {
+            blockX += dx;
+        }
+    }
 
-        if (Sprite == null)
-        {
-            return false;
+    private void hardDrop() {
+        while (canPlace(activeBlock, blockX, blockY + 1)) {
+            blockY++;
+        }
+        placeBlock();
+        spawnNewBlock();
+    }
+
+    // ======== CHECK FOR FULL LINES AND COLUMNS ========
+    private void checkFullLinesAndColumns() {
+        // Check full lines
+        for (int i = 0; i < rows; i++) {
+            boolean fullLine = true;
+            for (int j = 0; j < cols; j++) {
+                if (map[i][j] == 0) fullLine = false;
+            }
+            if (fullLine) {
+                // Full line detected -> clear the line
+                for (int j = 0; j < cols; j++) {
+                    map[i][j] = 0;
+                    colorMap[i][j] = null; // clear the color/image too
+                }
+
+                // Move all lines above down by one
+                for (int k = i - 1; k >= 0; k--) {
+                    for (int j = 0; j < cols; j++) {
+                        map[k + 1][j] = map[k][j];
+                        colorMap[k + 1][j] = colorMap[k][j];
+                    }
+                }
+
+                // Clear the top line after shift
+                for (int j = 0; j < cols; j++) {
+                    map[0][j] = 0;
+                    colorMap[0][j] = null;
+                }
+
+                i--; // recheck the same row index because it now contains the shifted row
+            }
         }
 
-        //Dessine la map fixe
-        for (int i = 0; i < ShapeMatrisMap.length; i++)
-        {
-            for (int j = 0; j < ShapeMatrisMap[i].length; j++)
-            {
-                if (ShapeMatrisMap[i][j] == 1)
-                {
-                    gc.drawImage(Sprite, j * blockSize, i * blockSize, blockSize, blockSize);
-                } else if (ShapeMatrisMap[i][j] == 2 && Sprite2 != null) {
-                    gc.drawImage(Sprite2, j * blockSize, i * blockSize, blockSize, blockSize);
+        // Check full columns
+        for (int j = 0; j < cols; j++) {
+            boolean fullCol = true;
+            for (int i = 0; i < rows; i++) {
+                if (map[i][j] == 0) fullCol = false;
+            }
+            if (fullCol) {
+                // Full column detected -> clear the column
+                for (int i = 0; i < rows; i++) {
+                    map[i][j] = 0;
+                    colorMap[i][j] = null;
+                }
+
+                // Move all columns left by one
+                for (int k = j + 1; k < cols; k++) {
+                    for (int i = 0; i < rows; i++) {
+                        map[i][k - 1] = map[i][k];
+                        colorMap[i][k - 1] = colorMap[i][k];
+                    }
+                }
+
+                // Clear the rightmost column after shift
+                for (int i = 0; i < rows; i++) {
+                    map[i][cols - 1] = 0;
+                    colorMap[i][cols - 1] = null;
+                }
+
+                j--; // recheck the same column index because it now contains the shifted column
+            }
+        }
+    }
+
+
+    // ======== RENDERING ========
+    @Override
+    public boolean draw(GraphicsContext gc) {
+        gc.setImageSmoothing(false);
+
+        double blockSize = scene.getHeight() / rows;
+        double width = blockSize * cols;
+        double offsetX = (scene.getWidth() - width) / 2;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (map[i][j] == 1) {
+                    gc.drawImage(colorMap[i][j], offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
+                } else {
+                    gc.setFill(Color.hsb(0,0,0,0.5));
+                    gc.fillRect(offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
+                    gc.setStroke(Color.gray(0.4));
+                    gc.strokeRect(offsetX + j * blockSize, i * blockSize, blockSize, blockSize);
                 }
             }
         }
 
-        //Dessine le bloc actif s'il existe
-        if (randomBlockType != null)
-        {
-            //int y = blockY * blockSize;
-            for (int i = 0; i < randomBlockType.length; i++)
-            {
-                //int x = blockX * blockSize;
-                for (int j = 0; j < randomBlockType[i].length; j++)
-                {
-                    if (randomBlockType[i][j] == 1)
-                    {
-                        int x = (blockX + j) * blockSize;
-                        int y = (blockY + i) * blockSize;
-                        gc.drawImage(Sprite, x, y, blockSize, blockSize);
-                    } else if (randomBlockType[i][j] == 2 && Sprite2 != null) {
-                        int x = (blockX + j) * blockSize;
-                        int y = (blockY + i) * blockSize;
-                        gc.drawImage(Sprite2, x, y, blockSize, blockSize);
+        // Draw active block on top
+        if (activeBlock != null) {
+            for (int i = 0; i < activeBlock.length; i++) {
+                for (int j = 0; j < activeBlock[i].length; j++) {
+                    if (activeBlock[i][j] == 1) {
+                        double x = offsetX + (blockX + j) * blockSize;
+                        double y = (blockY + i) * blockSize;
+                        gc.drawImage(activeBlockImage, x, y, blockSize, blockSize);
                     }
                 }
             }
         }
         return true;
-    }
-
-    //Getter pour la map
-    public Integer[][] getShapeMatrisMap()
-    {
-        return ShapeMatrisMap;
-    }
-
-    //Getter pour le bloc courant
-    public Integer[][] getRandomBlockType()
-    {
-        return randomBlockType;
-    }
-
-    //Getter pour la position X du bloc
-    public int getBlockX()
-    {
-        return blockX;
-    }
-
-    //Getter pour la position Y du bloc
-    public int getBlockY()
-    {
-        return blockY;
     }
 }
