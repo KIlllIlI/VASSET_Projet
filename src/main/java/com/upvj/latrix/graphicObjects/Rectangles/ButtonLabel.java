@@ -16,12 +16,15 @@ public class ButtonLabel<R extends ARectangleLabel> extends ARectangleLabel  {
     private Runnable onHoverEnter;
     private Runnable onHoverExit;
 
+    private RenderableCanvas Parent;
+
     private boolean isHovered = false;
 
 
 
-    public ButtonLabel(Scene scene, R WrappedRectangle) {
+    public ButtonLabel(Scene scene,RenderableCanvas Parent , R WrappedRectangle) {
         super(scene);
+        this.Parent = Parent;
         this.wrappedRectangle = WrappedRectangle;
         System.out.println(scene.toString());
 
@@ -66,7 +69,7 @@ public class ButtonLabel<R extends ARectangleLabel> extends ARectangleLabel  {
     }
 
     private void handleMouseClicked(MouseEvent e) {
-        if (wrappedRectangle.contains(e.getX(), e.getY()) && onClick != null) {
+        if (wrappedRectangle.contains(e.getX(), e.getY()) && onClick != null && Parent.isRendering()) {
             onClick.handle(e);
         }
     }

@@ -10,7 +10,9 @@ import javafx.scene.text.Text;
 
 public class TextLabel extends RectangleLabel {
 
-    private Font font = Font.getDefault();
+    private Font font = Font.loadFont(
+            getClass().getResourceAsStream("/com/upvj/latrix/Fonts/PixelOperator-Bold.ttf"), 14
+    );
 
     private String text;
 
@@ -36,9 +38,11 @@ public class TextLabel extends RectangleLabel {
 
         // Measure text at base size 1 to get accurate scaling
         Text t = new Text(text);
-        t.setFont(Font.font("Arial", 1));
+        t.setFont(Font.font(font.getFamily(), 1));
         double textW = t.getLayoutBounds().getWidth();
         double textH = t.getLayoutBounds().getHeight();
+
+
 
         // Compute scale so text fits inside the box
         double scale = Math.min(
@@ -46,7 +50,7 @@ public class TextLabel extends RectangleLabel {
                 super.AbsoluteHeight / textH
         );
 
-        Font scaledFont = Font.font("Arial", Math.min( FONT_SIZE , scale));
+        Font scaledFont = Font.font(font.getFamily(), Math.min( FONT_SIZE , scale));
         gc.setFont(scaledFont);
         gc.setFill(TextColor);
 

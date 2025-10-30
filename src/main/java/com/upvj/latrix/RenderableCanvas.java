@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class RenderableCanvas extends Canvas {
-    GraphicsContext GC;
+    protected GraphicsContext GC;
 
-    ArrayList<GraphicObject> RenderList = new ArrayList<>();
+    protected ArrayList<GraphicObject> RenderList = new ArrayList<>();
 
-    Comparator<GraphicObject> CompareOnZ = Comparator.comparingInt(GraphicObject::zIndex);
+    protected static Comparator<GraphicObject> CompareOnZ = Comparator.comparingInt(GraphicObject::zIndex);
 
-    Paint BackgroundColor = Color.TRANSPARENT;
+    protected Paint BackgroundColor = Color.TRANSPARENT;
 
     // Method used in the MainGraphicLoop
     public void Render()  {
@@ -38,12 +38,20 @@ public class RenderableCanvas extends Canvas {
 
     private final AnimationTimer MainGraphicLoop;
 
+    private boolean _isRendering = false;
+
+    public boolean isRendering() {
+        return _isRendering;
+    }
+
     public void StartRender(){
+        _isRendering = true;
         MainGraphicLoop.start();
 
     }
 
     public void StopRender(){
+        _isRendering = false;
         MainGraphicLoop.stop();
     }
 
@@ -55,12 +63,16 @@ public class RenderableCanvas extends Canvas {
 
         GC = this.getGraphicsContext2D();
 
+
+
         MainGraphicLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 Render();
             }
         };
+
+
 
 
 

@@ -22,14 +22,16 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         Group root = new Group();
-        Scene s = new Scene(root, 1500, 800, Color.WHITE);
+        stage.setMinWidth(1281);
+        stage.setMinHeight(720);
+        Scene s = new Scene(root, 1281, 720, Color.WHITE);
 
-        final GameCanvas canvas = new GameCanvas(s);
+        final GameCanvas gameCanvas = new GameCanvas(s);
         final MenuCanvas menu = new MenuCanvas(s);
 
 
 
-        root.getChildren().add(canvas);
+        root.getChildren().add(gameCanvas);
         root.getChildren().add(menu);
 
 
@@ -43,14 +45,23 @@ public class HelloApplication extends Application {
         stage.show();
 
         Tetris blok = new Tetris();
-        canvas.InsertInRenderList(blok);
+        gameCanvas.InsertInRenderList(blok);
 
 
 
-        canvas.setBackgroundColor(Color.WHITE);
+        gameCanvas.setBackgroundColor(Color.WHITE);
 
         menu.StartRender();
         menu.toFront();
+
+        menu.getStartButton().setOnClick(event -> {
+            menu.StopRender();
+            System.out.println("Still working ?");
+
+            gameCanvas.toFront();
+            gameCanvas.StartRender();
+
+        });
 
 
 
