@@ -1,11 +1,8 @@
 package com.upvj.latrix.graphicObjects.Rectangles;
 
 import com.upvj.latrix.GraphicObject;
-import com.upvj.latrix.RenderableCanvas;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.util.Pair;
 
 public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper for GraphiContext.fillRectangle()
@@ -19,6 +16,8 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
     protected double SizeX,SizeY = 0.0;
 
     protected int SizeOffsetX,SizeOffsetY = 0;
+
+    protected int _Zindex = 0;
 
 
 
@@ -47,7 +46,11 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
 
     @Override
     public int zIndex() {
-        return GraphicObject.super.zIndex();
+        return _Zindex;
+    }
+
+    public void setZindex(int zindex) {
+        this._Zindex = zindex;
     }
 
     public ARectangleLabel(Scene scene) {
@@ -156,6 +159,10 @@ public abstract class ARectangleLabel implements GraphicObject { //Fancy wrapper
     public void setParent(Scene scene) {
         this.scene = scene;
     }
+
+
+
+
 
 
 }
