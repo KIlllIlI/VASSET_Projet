@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.*;
 import javafx.stage.Stage;
-import com.upvj.latrix.gameObjects.*;
 
 
 
@@ -17,7 +16,7 @@ import java.io.IOException;
 
 public class HelloApplication extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
         SoundHelper.init();
 
         Group root = new Group();
