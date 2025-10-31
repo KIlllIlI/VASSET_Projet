@@ -7,6 +7,7 @@ import com.upvj.latrix.graphicObjects.Rectangles.ImageLabel;
 import com.upvj.latrix.graphicObjects.Rectangles.RectangleLabel;
 import com.upvj.latrix.graphicObjects.Rectangles.TextLabel;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
@@ -19,6 +20,8 @@ import javafx.util.Duration;
 import java.util.*;
 
 public class Tetris implements GraphicObject {
+
+    private final GameCanvas canvas;
 
     // ======== STATIC HELPERS ========
     private static final Integer[][][] ALL_BLOCKS = {
@@ -83,6 +86,8 @@ public class Tetris implements GraphicObject {
     private Integer[][] activeBlock;
     private Integer[][] nextBlock;
 
+    private PauseTransition explosionDelay;
+
 
     private Image activeBlockImage;
     private Image nextBlockImage;
@@ -110,7 +115,8 @@ public class Tetris implements GraphicObject {
     // ======== CONSTRUCTOR ========
     public Tetris(GameCanvas canvas) {
         this.scene = canvas.getScene();
-        this.map = ShapeMatrix.MAP.getMatrix();
+        this.canvas = canvas;
+        this.map = ShapeMatrix.cloneMatrix( ShapeMatrix.MAP.getMatrix());
         this.colorMap = new Image[rows][cols];
 
         initBlockImages(ImageLabel.getImageFromResource("block.png"));
@@ -194,10 +200,11 @@ public class Tetris implements GraphicObject {
 
 
 
-    private final double baseLaserSpeed = 0.08;
+    private final double baseLaserSpeed = 0.04;
     private double currentLaserSpeed = baseLaserSpeed;
+    private double direction = 1;
 
-    private int laserTimerGoal = 1000;
+    private int laserTimerGoal = 10000;
     private int laserTimerAccumulator = 0;
 
     private double laserPosition = 0.0;
@@ -265,47 +272,58 @@ public class Tetris implements GraphicObject {
     private void triggerExplosion(double blockXpx, double blockYpx, double blockSize) {
         if (activeBlock == null) return;
 
+        exploding = true;
+        explodingPieces.clear();
         double centerX = blockXpx + (activeBlock[0].length * blockSize) / 2;
         double centerY = blockYpx + (activeBlock.length * blockSize) / 2;
-
         double speed = blockSize * 0.3;
-        explodingPieces.clear();
-        explodingPieces.add(new double[]{centerX, centerY, -speed, -speed}); // top-left
-        explodingPieces.add(new double[]{centerX, centerY, speed, -speed});  // top-right
-        explodingPieces.add(new double[]{centerX, centerY, -speed, speed});  // bottom-left
-        explodingPieces.add(new double[]{centerX, centerY, speed, speed});   // bottom-right
+
+        explodingPieces.add(new double[]{centerX, centerY, -speed, -speed});
+        explodingPieces.add(new double[]{centerX, centerY, speed, -speed});
+        explodingPieces.add(new double[]{centerX, centerY, -speed, speed});
+        explodingPieces.add(new double[]{centerX, centerY, speed, speed});
 
         activeBlock = null;
-        exploding = true;
 
-        // Schedule a deferred task to stop explosion and spawn new block
-        new Thread(() -> {
-            try {
-                Thread.sleep(300); // wait 0.3 seconds
-            } catch (InterruptedException ignored) { }
-            // Must run UI updates on the JavaFX Application Thread
-            javafx.application.Platform.runLater(() -> {
-                exploding = false;
-                spawnNewBlock();
-            });
-        }).start();
-    }
-
-    private void dropExplodedPieces(double blockSize) {
-        for (double[] p : explodingPieces) {
-            int col = (int) ((p[0] - (scene.getWidth() - cols * blockSize) / 2) / blockSize);
-            int row = rows - 1; // drop to bottom for simplicity
-
-            if (col >= 0 && col < cols) {
-                map[row][col] = 1;
-                colorMap[row][col] = ImageLabel.getImageFromResource("block.png");
-            }
+        // Cancel any previous explosion delay
+        if (explosionDelay != null) {
+            explosionDelay.stop();
         }
-        explodingPieces.clear();
+
+        explosionDelay = new PauseTransition(Duration.millis(300));
+        explosionDelay.setOnFinished(e -> {
+            if (!running) return; // Do nothing if game is stopped
+            exploding = false;
+            spawnNewBlock();
+        });
+        explosionDelay.play();
     }
+
+    private void difficultyOnScore(){
+        if (Score <150) {
+            fallSpeed = 600;
+            fallSpeed = 600;
+            laserTimerGoal = 10000;
+            currentLaserSpeed = baseLaserSpeed;
+        } else if (Score < 300) {
+            fallSpeed = 400;
+            laserTimerGoal = 8000;
+            currentLaserSpeed = 0.05;
+        } else if (Score < 600) {
+            fallSpeed = 200;
+            laserTimerGoal = 5000;
+            currentLaserSpeed = 0.06;
+        } else if (Score < 1000) {
+            fallSpeed = 100;
+            laserTimerGoal = 2000;
+            currentLaserSpeed = 0.07;
+        }
+    }
+
 
     // GAME LOGIC RUN EVERY 16 MILIS
     private void update(double deltaMillis) {
+        if (!running) return; // skip everything if stopped
         if (exploding) return;
         timeAccumulator += deltaMillis;
         laserTimerAccumulator += deltaMillis;
@@ -317,9 +335,9 @@ public class Tetris implements GraphicObject {
         }
 
         // Laser gun movement
-        laserPosition += currentLaserSpeed;
+        laserPosition += currentLaserSpeed * direction;
         if (laserPosition >= cols - 1 || laserPosition < 0) {
-            currentLaserSpeed = -currentLaserSpeed;
+            direction = -direction;
         }
 
         // Fire laser periodically
@@ -338,9 +356,11 @@ public class Tetris implements GraphicObject {
     }
 
     public void stop() {
-        if (timeline != null) timeline.stop();
         running = false;
-        SoundHelper.stop(SoundHelper.Sound.BACKGROUND);
+        dispose(); // clean up everything
+
+        // Let the canvas handle game over sequence
+        canvas.onGameOver(this);
     }
 
     public boolean isRunning() {
@@ -538,6 +558,7 @@ public class Tetris implements GraphicObject {
         }
 
         Score += 10 * (linesRemoved*linesRemoved);
+        difficultyOnScore();
         ScoreValue.setText(String.valueOf(Score));
 
         // Check full columns
@@ -689,6 +710,27 @@ public class Tetris implements GraphicObject {
 
 
         return true;
+    }
+
+    public void dispose() {
+        // Stop the game loop
+        if (timeline != null) {
+            timeline.stop();
+            timeline = null;
+        }
+
+        // Clear input handlers
+        scene.setOnKeyPressed(null);
+
+        // Stop sounds
+        SoundHelper.stop(SoundHelper.Sound.BACKGROUND);
+
+        // Clear lasers and active block
+        Lasers.clear();
+        activeBlock = null;
+        activeBlockImage = null;
+        explodingPieces.clear();
+        exploding = false;
     }
 
     @Override

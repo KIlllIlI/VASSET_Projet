@@ -78,6 +78,10 @@ public class RenderableCanvas extends Canvas {
 
     }
 
+    public void DisposeRenderables() {
+        RenderList.clear();
+    }
+
     public void InsertInRenderList(GraphicObject Go) {
         if (!RenderList.contains(Go)){
             RenderList.add(Go);
