@@ -1,6 +1,7 @@
 package com.upvj.latrix.gameObjects;
 
 import com.upvj.latrix.GraphicObject;
+import com.upvj.latrix.SoundHelper;
 import com.upvj.latrix.graphicObjects.GameCanvas;
 import com.upvj.latrix.graphicObjects.Rectangles.ImageLabel;
 import com.upvj.latrix.graphicObjects.Rectangles.RectangleLabel;
@@ -15,10 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.util.Duration;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Tetris implements GraphicObject {
 
@@ -45,11 +43,18 @@ public class Tetris implements GraphicObject {
 
     private static final Map<Integer[][], Image> BLOCK_IMAGES = new HashMap<>();
 
+    private boolean exploding = false;
+    private final List<double[]> explodingPieces = new ArrayList<>(); // {x, y, vx, vy}
+
     private final Image[][] colorMap; // same size as map
 
-    private final TextLabel ScoreValue;
+    // ======== LABELS
 
+    private final TextLabel ScoreValue;
     private final RectangleLabel NextBlockLabel;
+
+
+
 
     private int Score = 0;
 
@@ -77,16 +82,21 @@ public class Tetris implements GraphicObject {
     private final Integer[][] map;
     private Integer[][] activeBlock;
     private Integer[][] nextBlock;
+
+
     private Image activeBlockImage;
     private Image nextBlockImage;
+    private final Image LaserImage = ImageLabel.getImageFromResource("LaserGun.png");
 
     private final int rows = 20;
     private final int cols = 10;
 
+
+
     private int blockX;
     private int blockY;
 
-    private final int fallSpeed = 600; // ms per step
+    private int fallSpeed = 600; // ms per step
     private Timeline timeline;
     private double timeAccumulator = 0; // counter for DOWN key reset
 
@@ -94,6 +104,8 @@ public class Tetris implements GraphicObject {
 
     private final java.util.List<Integer[][]> blockBag = new java.util.ArrayList<>();
     private final Random random = new Random();
+
+    private final ArrayList<double[]> Lasers = new ArrayList<>();
 
     // ======== CONSTRUCTOR ========
     public Tetris(GameCanvas canvas) {
@@ -163,24 +175,10 @@ public class Tetris implements GraphicObject {
         NextBlockLabel.setSizeOffset(200,250);
 
         NextBlockLabel.setBackgroundColor(Color.BLACK);
-
-
         NextBlockLabel.setZindex(1);
         canvas.InsertInRenderList(NextBlockLabel);
 
-
-
-
-
-
-
-
-
-
         startGameLoop();
-
-
-
 
     }
 
@@ -192,14 +190,140 @@ public class Tetris implements GraphicObject {
         running = true;
     }
 
-    private void update(double deltaMillis) {
-        timeAccumulator += deltaMillis;
 
-        // Forced fall based on fallSpeed
+
+    private final double baseLaserSpeed = 0.08;
+    private double currentLaserSpeed = baseLaserSpeed;
+
+    private int laserTimerGoal = 1000;
+    private int laserTimerAccumulator = 0;
+
+    private double laserPosition = 0.0;
+
+    private void shootLaser(double offsetX, double blockSize) {
+        // Snap X to closest column
+        int snappedCol = (int) Math.round(laserPosition);
+        double laserX = offsetX + snappedCol * blockSize;
+
+        // Start laser at bottom line
+        double startY = movedFromTop + rows * blockSize;
+        Lasers.add(new double[]{laserX, startY});
+    }
+
+    private void updateLasers(double deltaMillis) {
+        double blockSize = (scene.getHeight() - removedFromBottom) / rows;
+        double width = blockSize * cols;
+        double offsetX = (scene.getWidth() - width) / 2;
+
+
+
+        List<double[]> lasersToRemove = new ArrayList<>();
+        boolean explosionTriggered = false;
+
+        for (double[] laser : Lasers) {
+            laser[1] -= Math.abs(currentLaserSpeed) * blockSize * 2;
+
+            if (!explosionTriggered && activeBlock != null) {
+                double activeX = offsetX + blockX * blockSize;
+                double activeY = movedFromTop + blockY * blockSize;
+
+                for (int i = 0; i < activeBlock.length; i++) {
+                    for (int j = 0; j < activeBlock[i].length; j++) {
+                        if (activeBlock[i][j] == 1) {
+                            double bx = activeX + j * blockSize;
+                            double by = activeY + i * blockSize;
+
+                            if (laser[0] >= bx && laser[0] < bx + blockSize &&
+                                    laser[1] <= by + blockSize && laser[1] > by) {
+
+                                lasersToRemove.add(laser);
+                                explosionTriggered = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (explosionTriggered) break;
+                }
+            }
+
+            if (laser[1] < movedFromTop)
+                lasersToRemove.add(laser);
+        }
+
+// remove safely after iteration
+        Lasers.removeAll(lasersToRemove);
+
+// trigger explosion once after loop
+        if (explosionTriggered) {
+            triggerExplosion(offsetX + blockX * blockSize, movedFromTop + blockY * blockSize, blockSize);
+            SoundHelper.play(SoundHelper.Sound.EXPLOSION);
+        }
+    }
+
+    private void triggerExplosion(double blockXpx, double blockYpx, double blockSize) {
+        if (activeBlock == null) return;
+
+        // Compute block center
+        double centerX = blockXpx + (activeBlock[0].length * blockSize) / 2;
+        double centerY = blockYpx + (activeBlock.length * blockSize) / 2;
+
+        // Create 4 small pieces flying in different directions
+        double speed = blockSize * 0.3;
+        explodingPieces.clear();
+        explodingPieces.add(new double[]{centerX, centerY, -speed, -speed}); // top-left
+        explodingPieces.add(new double[]{centerX, centerY, speed, -speed});  // top-right
+        explodingPieces.add(new double[]{centerX, centerY, -speed, speed});  // bottom-left
+        explodingPieces.add(new double[]{centerX, centerY, speed, speed});   // bottom-right
+
+        // Immediately remove current block and spawn a new one
+        activeBlock = null;
+        exploding = false;
+        spawnNewBlock();
+    }
+
+    private void dropExplodedPieces(double blockSize) {
+        for (double[] p : explodingPieces) {
+            int col = (int) ((p[0] - (scene.getWidth() - cols * blockSize) / 2) / blockSize);
+            int row = rows - 1; // drop to bottom for simplicity
+
+            if (col >= 0 && col < cols) {
+                map[row][col] = 1;
+                colorMap[row][col] = ImageLabel.getImageFromResource("block.png");
+            }
+        }
+        explodingPieces.clear();
+    }
+
+    // GAME LOGIC RUN EVERY 16 MILIS
+    private void update(double deltaMillis) {
+        if (exploding) return;
+        timeAccumulator += deltaMillis;
+        laserTimerAccumulator += deltaMillis;
+
+        // Forced fall
         if (timeAccumulator >= fallSpeed) {
             moveDown();
             timeAccumulator = 0;
         }
+
+        // Laser gun movement
+        laserPosition += currentLaserSpeed;
+        if (laserPosition >= cols - 1 || laserPosition < 0) {
+            currentLaserSpeed = -currentLaserSpeed;
+        }
+
+        // Fire laser periodically
+        if (laserTimerAccumulator >= laserTimerGoal) {
+            laserTimerAccumulator = 0;
+            double blockSize = (scene.getHeight() - removedFromBottom) / rows;
+            double width = blockSize * cols;
+            double offsetX = (scene.getWidth() - width) / 2;
+
+            shootLaser(offsetX, blockSize);
+        }
+
+        // Move lasers upward
+        updateLasers(deltaMillis);
     }
 
     public void stop() {
@@ -210,6 +334,8 @@ public class Tetris implements GraphicObject {
     public boolean isRunning() {
         return running;
     }
+
+
 
     // ======== INPUT HANDLING ========
     private void setupInput() {
@@ -515,6 +641,40 @@ public class Tetris implements GraphicObject {
             drawNextBlock(gc, nextBlock, nextBlockImage );
 
         }
+
+        //Draw laserLine
+
+        double lineWidth = cols*blockSize;
+
+        double lineY = movedFromTop*2 + blockSize * rows ;
+        double lineHeight = movedFromTop;
+
+        gc.setFill(gray);
+        gc.fillRect(offsetX, lineY, lineWidth, lineHeight);
+
+        //Draw laser
+
+        double laserY = lineY + (lineHeight - blockSize) / 2;
+
+        gc.drawImage(LaserImage, offsetX + laserPosition * blockSize, laserY, blockSize, blockSize);
+
+        for (double[] laser : Lasers) {
+            gc.setFill(Color.RED);
+            gc.fillRect(laser[0] + blockSize * 0.4, laser[1], blockSize * 0.2, blockSize);
+        }
+
+        //Draw explosion
+
+        if (exploding) {
+            gc.setFill(Color.ORANGE);
+            for (double[] p : explodingPieces) {
+                p[0] += p[2];
+                p[1] += p[3];
+                gc.fillOval(p[0] - blockSize / 4, p[1] - blockSize / 4, blockSize / 2, blockSize / 2);
+            }
+        }
+
+
 
         return true;
     }

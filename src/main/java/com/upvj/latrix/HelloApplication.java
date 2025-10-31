@@ -18,6 +18,9 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
+
+        SoundHelper.init();
+
         Group root = new Group();
         stage.setMinWidth(1281);
         stage.setMinHeight(720);
