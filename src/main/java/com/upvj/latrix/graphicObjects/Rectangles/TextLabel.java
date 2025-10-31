@@ -9,8 +9,8 @@ import javafx.scene.text.Text;
 
 public class TextLabel extends RectangleLabel {
 
-    private Font font = Font.loadFont(
-            getClass().getResourceAsStream("/com/upvj/latrix/Fonts/PixelOperator-Bold.ttf"), 14
+    private final Font font = Font.loadFont(
+            getClass().getResourceAsStream("/com/upjv/latrix/Fonts/PixelOperator-Bold.ttf"), 14
     );
 
     private String text;
@@ -67,11 +67,6 @@ public class TextLabel extends RectangleLabel {
         return true;
     }
 
-
-
-    public String getText() {
-        return text;
-    }
 
     public void setText(String text) {
         this.text = text;

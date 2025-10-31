@@ -17,7 +17,7 @@ public class ImageLabel extends ARectangleLabel{
     public static Image getImageFromResource(String url){
         return new Image(
                 Objects.requireNonNull(
-                        ImageLabel.class.getResource( "/com/upvj/latrix/" + url)
+                        ImageLabel.class.getResource( "/com/upjv/latrix/" + url)
                 ).toExternalForm()
         );
     }
