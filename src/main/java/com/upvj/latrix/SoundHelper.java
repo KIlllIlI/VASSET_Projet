@@ -25,7 +25,7 @@ public class SoundHelper {
 
     private static void loadSound(Sound sound, String fileName) {
         try {
-            URL url = SoundHelper.class.getResource( "/com/upvj/latrix/sounds/" + fileName);
+            URL url = SoundHelper.class.getResource( "/sounds/" + fileName);
             System.out.println();
             if (url == null) {
                 System.err.println("Sound file not found: " + fileName);

@@ -180,6 +180,8 @@ public class Tetris implements GraphicObject {
 
         startGameLoop();
 
+        SoundHelper.playLooped(SoundHelper.Sound.BACKGROUND);
+
     }
 
     // ======== GAME LOOP ========
@@ -263,11 +265,9 @@ public class Tetris implements GraphicObject {
     private void triggerExplosion(double blockXpx, double blockYpx, double blockSize) {
         if (activeBlock == null) return;
 
-        // Compute block center
         double centerX = blockXpx + (activeBlock[0].length * blockSize) / 2;
         double centerY = blockYpx + (activeBlock.length * blockSize) / 2;
 
-        // Create 4 small pieces flying in different directions
         double speed = blockSize * 0.3;
         explodingPieces.clear();
         explodingPieces.add(new double[]{centerX, centerY, -speed, -speed}); // top-left
@@ -275,10 +275,20 @@ public class Tetris implements GraphicObject {
         explodingPieces.add(new double[]{centerX, centerY, -speed, speed});  // bottom-left
         explodingPieces.add(new double[]{centerX, centerY, speed, speed});   // bottom-right
 
-        // Immediately remove current block and spawn a new one
         activeBlock = null;
-        exploding = false;
-        spawnNewBlock();
+        exploding = true;
+
+        // Schedule a deferred task to stop explosion and spawn new block
+        new Thread(() -> {
+            try {
+                Thread.sleep(300); // wait 0.3 seconds
+            } catch (InterruptedException ignored) { }
+            // Must run UI updates on the JavaFX Application Thread
+            javafx.application.Platform.runLater(() -> {
+                exploding = false;
+                spawnNewBlock();
+            });
+        }).start();
     }
 
     private void dropExplodedPieces(double blockSize) {
@@ -319,6 +329,7 @@ public class Tetris implements GraphicObject {
             double width = blockSize * cols;
             double offsetX = (scene.getWidth() - width) / 2;
 
+            SoundHelper.play(SoundHelper.Sound.LASER);
             shootLaser(offsetX, blockSize);
         }
 
@@ -329,6 +340,7 @@ public class Tetris implements GraphicObject {
     public void stop() {
         if (timeline != null) timeline.stop();
         running = false;
+        SoundHelper.stop(SoundHelper.Sound.BACKGROUND);
     }
 
     public boolean isRunning() {
