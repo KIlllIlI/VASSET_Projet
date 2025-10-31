@@ -6,6 +6,7 @@ import com.upvj.latrix.graphicObjects.Rectangles.*;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.*;
 import javafx.stage.Stage;
 import com.upvj.latrix.gameObjects.*;
@@ -23,6 +24,10 @@ public class HelloApplication extends Application {
         stage.setMinWidth(1281);
         stage.setMinHeight(720);
         Scene s = new Scene(root, 1281, 720, Color.WHITE);
+
+        Image icon = ImageLabel.getImageFromResource("LaserGun.png");
+
+        stage.getIcons().add(icon);
 
         final MenuCanvas menu = new MenuCanvas(s);
         final GameCanvas gameCanvas = new GameCanvas(s,menu);
