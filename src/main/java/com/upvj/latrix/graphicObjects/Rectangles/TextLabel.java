@@ -1,6 +1,5 @@
 package com.upvj.latrix.graphicObjects.Rectangles;
 
-import com.upvj.latrix.RenderableCanvas;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -10,8 +9,8 @@ import javafx.scene.text.Text;
 
 public class TextLabel extends RectangleLabel {
 
-    private Font font = Font.loadFont(
-            getClass().getResourceAsStream("/com/upvj/latrix/Fonts/PixelOperator-Bold.ttf"), 14
+    private final Font font = Font.loadFont(
+            getClass().getResourceAsStream("/com/upjv/latrix/Fonts/PixelOperator-Bold.ttf"), 14
     );
 
     private String text;
@@ -23,13 +22,13 @@ public class TextLabel extends RectangleLabel {
     public TextLabel(Scene scene, String text) {
         super(scene);
         this.text = text;
-        TextColor = Color.BLACK;
+        TextColor = Color.WHITE;
     }
 
     public TextLabel(Scene scene) {
         super(scene);
         this.text = "Label";
-        TextColor = Color.BLACK;
+        TextColor = Color.WHITE;
     }
 
     @Override
@@ -68,33 +67,16 @@ public class TextLabel extends RectangleLabel {
         return true;
     }
 
-    public Font getFont() {
-        return font;
-    }
-
-    public void setFont(Font font) {
-        this.font = font;
-    }
-
-    public String getText() {
-        return text;
-    }
 
     public void setText(String text) {
         this.text = text;
     }
 
-    public double getFONT_SIZE() {
-        return FONT_SIZE;
-    }
 
     public void setFONT_SIZE(double FONT_SIZE) {
         this.FONT_SIZE = FONT_SIZE;
     }
 
-    public Paint getTextColor() {
-        return TextColor;
-    }
 
     public void setTextColor(Paint textColor) {
         TextColor = textColor;

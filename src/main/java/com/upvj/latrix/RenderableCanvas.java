@@ -78,12 +78,14 @@ public class RenderableCanvas extends Canvas {
 
     }
 
+    public void DisposeRenderables() {
+        RenderList.clear();
+    }
+
     public void InsertInRenderList(GraphicObject Go) {
         if (!RenderList.contains(Go)){
             RenderList.add(Go);
             RenderList.sort(CompareOnZ);
-
-            System.out.println("Renderlist now has "+RenderList.size()+" elements");
         }
     }
 

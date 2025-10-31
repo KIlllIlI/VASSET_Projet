@@ -17,7 +17,7 @@ public class ImageLabel extends ARectangleLabel{
     public static Image getImageFromResource(String url){
         return new Image(
                 Objects.requireNonNull(
-                        ImageLabel.class.getResource( "/com/upvj/latrix/" + url)
+                        ImageLabel.class.getResource( "/com/upjv/latrix/" + url)
                 ).toExternalForm()
         );
     }
@@ -84,19 +84,15 @@ public class ImageLabel extends ARectangleLabel{
 
 
 
-
+    /* Unused
     public ImageLabel(Scene scene, Image image) {
         super(scene);
         this.image = image;
     }
-
+    */
     public ImageLabel(Scene scene, String filePath) {
         super(scene);
-        this.image = new Image(
-                Objects.requireNonNull(
-                        getClass().getResource( "/com/upvj/latrix/" + filePath)
-                ).toExternalForm()
-        );
+        this.image = ImageLabel.getImageFromResource(filePath);
 
         super.setSizeOffset((int) image.getWidth(), (int)image.getHeight());
 

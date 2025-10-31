@@ -1,6 +1,7 @@
 module com.upvj.latrix {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
     opens com.upvj.latrix to javafx.fxml;
